@@ -7,6 +7,7 @@ const Signup = ({ onBackToLogin }) => {
     username: '',
     password: '',
     role: 'user',
+    shopName: '',
   });
 
   const [message, setMessage] = useState('');
@@ -48,6 +49,14 @@ const Signup = ({ onBackToLogin }) => {
           required
         /><br />
 
+        <input
+          type="text"
+          placeholder="Shop Name"
+          value={formData.shopName}
+          onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+          required
+        /><br />
+
         <select
           value={formData.role}
           onChange={(e) => setFormData({ ...formData, role: e.target.value })}
@@ -60,7 +69,6 @@ const Signup = ({ onBackToLogin }) => {
         <p style={{ marginTop: '10px' }}>
           Already have an account? <span style={{ color: 'blue', cursor: 'pointer' }} onClick={onBackToLogin}>Login</span>
         </p>
-
         {message && <p style={{ marginTop: '10px', color: 'green' }}>{message}</p>}
       </form>
     </div>

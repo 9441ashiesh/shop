@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
-const AdminDashboard = ({ products, fetchProducts }) => {
+const AdminDashboard = ({ products, fetchProducts, shopId }) => {
   const [form, setForm] = useState({
     name: '',
     buyPrice: '',
@@ -27,7 +28,7 @@ const AdminDashboard = ({ products, fetchProducts }) => {
     if (editId) {
       await axios.put(`http://localhost:5000/api/products/update/${editId}`, form);
     } else {
-      await axios.post('http://localhost:5000/api/products/add', form);
+      await axios.post('http://localhost:5000/api/products/add', { ...form, shop: shopId });
     }
     setForm({ name: '', buyPrice: '', sellPrice: '' });
     setEditId(null);
@@ -42,6 +43,50 @@ const AdminDashboard = ({ products, fetchProducts }) => {
   const handleDelete = async (id) => {
     await axios.delete(`http://localhost:5000/api/products/delete/${id}`);
     fetchProducts();
+  };
+
+  // Export filtered products to Excel (now includes _id)
+  const handleExportExcel = () => {
+    const data = filteredProducts.map(({ _id, name, buyPrice, sellPrice }) => ({
+      ID: _id,
+      Name: name,
+      'Buy Price': buyPrice,
+      'Sell Price': sellPrice,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+    XLSX.writeFile(workbook, 'products.xlsx');
+  };
+
+  // Handle Excel file upload and update products
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(worksheet);
+      for (const row of rows) {
+        if (row.ID && (row['Buy Price'] !== undefined || row['Sell Price'] !== undefined)) {
+          try {
+            console.log('Updating:', row.ID, row['Buy Price'], row['Sell Price']);
+            await axios.put(`http://localhost:5000/api/products/update/${row.ID}`, {
+              buyPrice: row['Buy Price'],
+              sellPrice: row['Sell Price'],
+            });
+          } catch (err) {
+            console.error('Update failed for', row.ID, err);
+          }
+        }
+      }
+      fetchProducts();
+      alert('Products updated successfully!');
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   return (
@@ -83,24 +128,31 @@ const AdminDashboard = ({ products, fetchProducts }) => {
         <div className="dashboard-ui-divider" />
         <div className="dashboard-ui-table-card">
           <h2 className="dashboard-ui-title">Product List</h2>
-          <div className="dashboard-controls">
-            <input
-              className="dashboard-search-input"
-              type="text"
-              placeholder="Search by name..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            <select
-              className="dashboard-filter-select"
-              value={filter}
-              onChange={e => setFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="below50">Below ₹50</option>
-              <option value="50to100">₹50–₹100</option>
-              <option value="above100">Above ₹100</option>
-            </select>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div>
+              <button onClick={handleExportExcel} className="dashboard-ui-export-btn" style={{ padding: '6px 14px', fontWeight: 600, borderRadius: 4, background: '#4caf50', color: '#fff', border: 'none', cursor: 'pointer', marginRight: 10 }}>
+                Export to Excel
+              </button>
+            </div>
+            <div className="dashboard-controls">
+              <input
+                className="dashboard-search-input"
+                type="text"
+                placeholder="Search by name..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              <select
+                className="dashboard-filter-select"
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="below50">Below ₹50</option>
+                <option value="50to100">₹50–₹100</option>
+                <option value="above100">Above ₹100</option>
+              </select>
+            </div>
           </div>
           <div className="dashboard-ui-table-wrapper">
             <table className="dashboard-ui-table">

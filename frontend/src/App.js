@@ -20,12 +20,13 @@ function App() {
       console.error('Error fetching products:', error);
     }
   };
-  const handleLogin = async (username, password, selectedRole) => {
+  const handleLogin = async (username, password, selectedRole, shopName) => {
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', {
         username,
         password,
         role: selectedRole,
+        shopName,
       });
   
       if (res.data.role === selectedRole) {

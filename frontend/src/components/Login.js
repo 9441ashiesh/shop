@@ -5,10 +5,11 @@ const Login = ({ onLogin, onShowSignup }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user'); // default to 'user'
+  const [shopName, setShopName] = useState(''); // NEW
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onLogin(username, password, role);
+    onLogin(username, password, role, shopName); // pass shopName
   };
 
   return (
@@ -28,6 +29,14 @@ const Login = ({ onLogin, onShowSignup }) => {
           placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        /><br />
+
+        <input
+          type="text"
+          placeholder="Shop Name"
+          value={shopName}
+          onChange={(e) => setShopName(e.target.value)}
           required
         /><br />
 
