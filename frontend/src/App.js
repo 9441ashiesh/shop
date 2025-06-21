@@ -11,15 +11,19 @@ function App() {
   const [role, setRole] = useState(null);
   const [products, setProducts] = useState([]);
   const [isSignup, setIsSignup] = useState(false);
+  const [shopName, setShopName] = useState(null);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (shopName) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      console.log('fetchProducts - shopName:', shopName);
+      const res = await axios.get(`http://localhost:5000/api/products/${shopName}`);
+      console.log('fetchProducts - response:', res.data);
       setProducts(res.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   };
+
   const handleLogin = async (username, password, selectedRole, shopName) => {
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', {
@@ -30,8 +34,9 @@ function App() {
       });
   
       if (res.data.role === selectedRole) {
-        setRole(res.data.role); // ✅ Now role will be either 'admin' or 'user'
-        fetchProducts();
+        setRole(res.data.role);
+        setShopName(shopName);
+        fetchProducts(shopName);
       } else {
         alert("Role mismatch: You selected '" + selectedRole + "' but this account is '" + res.data.role + "'");
       }
@@ -47,10 +52,10 @@ function App() {
       {!role && isSignup && <Signup onBackToLogin={() => setIsSignup(false)} />}
 
       {role === 'admin' && (
-        <AdminDashboard products={products} fetchProducts={fetchProducts} />
+        <AdminDashboard products={products} fetchProducts={() => fetchProducts(shopName)} shopName={shopName} />
       )}
 
-      {role === 'user' && <UserDashboard products={products} />}
+      {role === 'user' && <UserDashboard products={products} shopName={shopName} />}
     </div>
   );
 }

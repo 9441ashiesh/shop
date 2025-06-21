@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 
-const UserDashboard = ({ products }) => {
+const UserDashboard = ({ products, shopName }) => {
+  console.log('UserDashboard - products:', products); // Debug log
+  console.log('UserDashboard - shopName:', shopName); // Debug log
+  
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
@@ -13,9 +16,11 @@ const UserDashboard = ({ products }) => {
     return matchesSearch && matchesFilter;
   });
 
+  console.log('UserDashboard - filteredProducts:', filteredProducts); // Debug log
+
   return (
     <div className="dashboard">
-      <h2>User Dashboard</h2>
+      <h2>User Dashboard - {shopName}</h2>
       <div className="dashboard-controls">
         <input
           className="dashboard-search-input"
@@ -35,13 +40,19 @@ const UserDashboard = ({ products }) => {
           <option value="above100">Above ₹100</option>
         </select>
       </div>
-      <ul>
-        {filteredProducts.map((p) => (
-          <li key={p._id}>
-            {p.name} – Buy: ₹{p.buyPrice}, Sell: ₹{p.sellPrice}
-          </li>
-        ))}
-      </ul>
+      {filteredProducts.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
+          {products.length === 0 ? 'No products found for this shop.' : 'No products match your search/filter criteria.'}
+        </p>
+      ) : (
+        <ul>
+          {filteredProducts.map((p) => (
+            <li key={p._id}>
+              {p.name} – Buy: ₹{p.buyPrice}, Sell: ₹{p.sellPrice}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

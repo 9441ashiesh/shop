@@ -3,7 +3,9 @@ import axios from 'axios';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 
-const AdminDashboard = ({ products, fetchProducts, shopId }) => {
+const AdminDashboard = ({ products, fetchProducts, shopName }) => {
+  console.log('AdminDashboard - products:', products); // Debug log
+  console.log('AdminDashboard - shopName:', shopName); // Debug log
   const [form, setForm] = useState({
     name: '',
     buyPrice: '',
@@ -23,12 +25,14 @@ const AdminDashboard = ({ products, fetchProducts, shopId }) => {
     return matchesSearch && matchesFilter;
   });
 
+  console.log('AdminDashboard - filteredProducts:', filteredProducts); // Debug log
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editId) {
-      await axios.put(`http://localhost:5000/api/products/update/${editId}`, form);
+      await axios.put(`http://localhost:5000/api/products/update/${editId}`, { ...form, shop: shopName });
     } else {
-      await axios.post('http://localhost:5000/api/products/add', { ...form, shop: shopId });
+      await axios.post('http://localhost:5000/api/products/add', { ...form, shop: shopName });
     }
     setForm({ name: '', buyPrice: '', sellPrice: '' });
     setEditId(null);
@@ -41,7 +45,7 @@ const AdminDashboard = ({ products, fetchProducts, shopId }) => {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/products/delete/${id}`);
+    await axios.delete(`http://localhost:5000/api/products/delete/${id}?shop=${shopName}`);
     fetchProducts();
   };
 
@@ -165,17 +169,25 @@ const AdminDashboard = ({ products, fetchProducts, shopId }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((p, idx) => (
-                  <tr key={p._id} className={idx % 2 === 0 ? 'dashboard-ui-row-even' : 'dashboard-ui-row-odd'}>
-                    <td>{p.name}</td>
-                    <td>₹{p.buyPrice}</td>
-                    <td>₹{p.sellPrice}</td>
-                    <td>
-                      <button onClick={() => handleEdit(p)} className="dashboard-ui-edit-btn" title="Edit"><FaEdit /></button>
-                      <button onClick={() => handleDelete(p._id)} className="dashboard-ui-delete-btn" title="Delete"><FaTrash /></button>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                      {products.length === 0 ? 'No products found for this shop. Add some products to get started!' : 'No products match your search/filter criteria.'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredProducts.map((p, idx) => (
+                    <tr key={p._id} className={idx % 2 === 0 ? 'dashboard-ui-row-even' : 'dashboard-ui-row-odd'}>
+                      <td>{p.name}</td>
+                      <td>₹{p.buyPrice}</td>
+                      <td>₹{p.sellPrice}</td>
+                      <td>
+                        <button onClick={() => handleEdit(p)} className="dashboard-ui-edit-btn" title="Edit"><FaEdit /></button>
+                        <button onClick={() => handleDelete(p._id)} className="dashboard-ui-delete-btn" title="Delete"><FaTrash /></button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

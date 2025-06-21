@@ -1,9 +1,11 @@
+// backend/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Shop = require('../models/Shop');
 
-// Signup
+// 🟢 Sign Up
+// POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   const { username, password, role, shopName } = req.body;
   console.log('POST /auth/signup - request body:', req.body); // Debug log
@@ -18,14 +20,6 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // Create or find the shop
-    let shop = await Shop.findOne({ name: shopName });
-    if (!shop) {
-      shop = new Shop({ name: shopName, products: [] });
-      await shop.save();
-      console.log('POST /auth/signup - shop created:', shop); // Debug log
-    }
-
     // Save shop name directly
     const newUser = new User({ username, password, role, shop: shopName });
     await newUser.save();
@@ -38,7 +32,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login
+// routes/authRoutes.js
 router.post('/login', async (req, res) => {
   const { username, password, role, shopName } = req.body;
   console.log('POST /auth/login - request body:', req.body); // Debug log
@@ -59,4 +53,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;
