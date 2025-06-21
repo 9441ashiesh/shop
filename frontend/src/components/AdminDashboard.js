@@ -97,7 +97,7 @@ const AdminDashboard = ({ products, fetchProducts, shopName }) => {
     <div className="dashboard-ui-root">
       <div className="dashboard-ui-container">
         <div className="dashboard-ui-form-card">
-          <h2 className="dashboard-ui-title"><FaPlus style={{marginRight: 8}}/>Add / Edit Product</h2>
+          <h2 className="dashboard-ui-title"><FaPlus style={{marginRight: 8}}/>Add / Edit Product - {shopName}</h2>
           <form onSubmit={handleSubmit} className="dashboard-ui-form">
             <label className="dashboard-ui-label">Product Name</label>
             <input
@@ -131,7 +131,7 @@ const AdminDashboard = ({ products, fetchProducts, shopName }) => {
         </div>
         <div className="dashboard-ui-divider" />
         <div className="dashboard-ui-table-card">
-          <h2 className="dashboard-ui-title">Product List</h2>
+          <h2 className="dashboard-ui-title">Product List of {shopName}</h2>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div>
               <button onClick={handleExportExcel} className="dashboard-ui-export-btn" style={{ padding: '6px 14px', fontWeight: 600, borderRadius: 4, background: '#4caf50', color: '#fff', border: 'none', cursor: 'pointer', marginRight: 10 }}>
